@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+var BuiltIn = map[string]struct{}{
+	"echo": {},
+	"type": {},
+	"exit": {},
+}
+
 func main() {
 
 	for {
@@ -23,7 +29,9 @@ func main() {
 
 		switch command {
 		case "echo":
-			fmt.Println(echo(args))
+			echo(args)
+		case "type":
+			checkType(args)
 		case "exit":
 			return
 		default:
@@ -33,6 +41,20 @@ func main() {
 	}
 }
 
-func echo(args []string) string {
-	return strings.Join(args, " ")
+func echo(args []string) {
+	fmt.Println(strings.Join(args, " "))
+}
+
+func checkType(args []string) {
+	if len(args) > 1 {
+		fmt.Println("Type command accepts a single parameter")
+		return
+	}
+	command := args[0]
+	_, ok := BuiltIn[command]
+	if ok {
+		fmt.Println(command + " is a shell builtin")
+	} else {
+		fmt.Println(command + ": not found")
+	}
 }
