@@ -30,6 +30,8 @@ func main() {
 			builtins.Echo(args)
 		case "type":
 			builtins.CheckType(args)
+		case "pwd":
+			builtins.Pwd()
 		case "exit":
 			return
 		default:
