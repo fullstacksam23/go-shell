@@ -5,4 +5,5 @@ var BuiltIn = map[string]struct{}{
 	"type": {},
 	"exit": {},
 	"pwd":  {},
+	"cd":   {},
 }

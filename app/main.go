@@ -4,11 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/codecrafters-io/shell-starter-go/builtins"
-	"github.com/codecrafters-io/shell-starter-go/pathutil"
 )
 
 func main() {
@@ -21,7 +19,7 @@ func main() {
 			return
 		}
 
-		items := strings.Fields(input)
+		items := parse(strings.TrimSpace(input))
 		command := items[0]
 		args := items[1:]
 
@@ -32,30 +30,13 @@ func main() {
 			builtins.CheckType(args)
 		case "pwd":
 			builtins.Pwd()
+		case "cd":
+			builtins.Cd(args)
 		case "exit":
 			return
 		default:
 			executor(command, args)
 		}
 
-	}
-}
-
-func executor(command string, args []string) {
-
-	isExecutable, _ := pathutil.FindExecutable(command)
-	if !isExecutable {
-		fmt.Println(command + ": not found")
-		return
-	}
-
-	cmd := exec.Command(command, args...)
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-
-	err := cmd.Run()
-	if err != nil {
-		fmt.Println(err)
 	}
 }
