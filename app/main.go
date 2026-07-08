@@ -52,6 +52,9 @@ func checkType(args []string) {
 		return
 	}
 	command := args[0]
+	if len(command) != 1 {
+		return
+	}
 	_, ok := BuiltIn[command]
 	if ok {
 		fmt.Println(command + " is a shell builtin")
@@ -67,26 +70,21 @@ func checkType(args []string) {
 
 func findExecutable(command string) (bool, string) {
 	pathEnv := os.Getenv("PATH")
-	extensionsEnv := os.Getenv("PATHEXT")
-
 	directories := filepath.SplitList(pathEnv)
-	extensions := filepath.SplitList(extensionsEnv)
 
 	for _, dir := range directories {
 		if dir == "" {
 			continue
 		}
-		for _, ext := range extensions {
-			filename := command + ext
 
-			fullPath := filepath.Join(dir, filename)
+		fullPath := filepath.Join(dir, command)
 
-			if isExecutable(fullPath) {
-				return true, fullPath
-			}
+		if isExecutable(fullPath) {
+			return true, fullPath
 		}
 	}
-	return false, "not found"
+
+	return false, ""
 }
 
 func isExecutable(fullPath string) bool {
