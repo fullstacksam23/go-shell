@@ -6,13 +6,10 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-)
 
-var BuiltIn = map[string]struct{}{
-	"echo": {},
-	"type": {},
-	"exit": {},
-}
+	"github.com/codecrafters-io/shell-starter-go/builtins"
+	"github.com/codecrafters-io/shell-starter-go/pathutil"
+)
 
 func main() {
 
@@ -30,50 +27,33 @@ func main() {
 
 		switch command {
 		case "echo":
-			echo(args)
+			builtins.Echo(args)
 		case "type":
-			checkType(args)
+			builtins.CheckType(args)
 		case "exit":
 			return
 		default:
-			fmt.Printf("%s: command not found\n", command)
+			executor(command, args)
 		}
 
 	}
 }
 
-func echo(args []string) {
-	fmt.Println(strings.Join(args, " "))
-}
+func executor(command string, args []string) {
 
-func checkType(args []string) {
-	if len(args) > 1 {
-		fmt.Println("Type command accepts a single parameter")
-		return
-	}
-
-	if len(args) != 1 {
-		return
-	}
-	command := args[0]
-
-	_, ok := BuiltIn[command]
-	if ok {
-		fmt.Println(command + " is a shell builtin")
-		return
-	}
-	found, path := findExecutable(command)
-	if found {
-		fmt.Printf("%s is %s\n", command, path)
-	} else {
+	isExecutable, _ := pathutil.FindExecutable(command)
+	if !isExecutable {
 		fmt.Println(command + ": not found")
+		return
 	}
-}
 
-func findExecutable(command string) (bool, string) {
-	path, err := exec.LookPath(command)
+	cmd := exec.Command(command, args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+
+	err := cmd.Run()
 	if err != nil {
-		return false, ""
+		fmt.Println(err)
 	}
-	return true, path
 }
