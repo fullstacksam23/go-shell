@@ -13,6 +13,15 @@ func Cd(args []string) {
 		return
 	}
 	dir := args[0]
+	if dir == "~" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			fmt.Printf("cd: %s: No such file or directory\n", dir)
+			return
+		}
+		dir = home
+	}
+
 	info, err := os.Stat(dir)
 	if err != nil {
 		fmt.Printf("cd: %s: No such file or directory\n", dir)
