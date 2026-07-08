@@ -15,7 +15,7 @@ func Cd(args []string) {
 	dir := args[0]
 	info, err := os.Stat(dir)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("cd: %s: No such file or directory", dir)
 		return
 	}
 	if info.IsDir() {
