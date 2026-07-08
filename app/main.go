@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"path/filepath"
+	"os/exec"
 	"strings"
 )
 
@@ -51,10 +51,12 @@ func checkType(args []string) {
 		fmt.Println("Type command accepts a single parameter")
 		return
 	}
-	command := args[0]
-	if len(command) != 1 {
+
+	if len(args) != 1 {
 		return
 	}
+	command := args[0]
+
 	_, ok := BuiltIn[command]
 	if ok {
 		fmt.Println(command + " is a shell builtin")
@@ -69,32 +71,9 @@ func checkType(args []string) {
 }
 
 func findExecutable(command string) (bool, string) {
-	pathEnv := os.Getenv("PATH")
-	directories := filepath.SplitList(pathEnv)
-
-	for _, dir := range directories {
-		if dir == "" {
-			continue
-		}
-
-		fullPath := filepath.Join(dir, command)
-
-		if isExecutable(fullPath) {
-			return true, fullPath
-		}
-	}
-
-	return false, ""
-}
-
-func isExecutable(fullPath string) bool {
-	info, err := os.Stat(fullPath)
+	path, err := exec.LookPath(command)
 	if err != nil {
-		return false
+		return false, ""
 	}
-	if info.IsDir() {
-		return false
-	}
-	mode := info.Mode()
-	return mode&0111 != 0
+	return true, path
 }
