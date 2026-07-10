@@ -1,16 +1,32 @@
 package main
 
-import "regexp"
-
-var tokenRE = regexp.MustCompile(`"[^"]*"|\S+`)
+import "strings"
 
 func parse(input string) []string {
-	tokens := tokenRE.FindAllString(input, -1)
+	var tokens []string
+	var current strings.Builder
+	var inSingleQuotes bool
+	for _, r := range input {
+		switch {
+		case r == '\'' && !inSingleQuotes:
+			inSingleQuotes = true
 
-	for i, t := range tokens {
-		if len(t) >= 2 && t[0] == '"' && t[len(t)-1] == '"' {
-			tokens[i] = t[1 : len(t)-1]
+		case r == '\'' && inSingleQuotes:
+			inSingleQuotes = false
+
+		case r == ' ' && !inSingleQuotes:
+			if current.Len() > 0 {
+				tokens = append(tokens, current.String())
+				current.Reset()
+			}
+
+		default:
+			current.WriteRune(r)
 		}
+	}
+
+	if current.Len() > 0 {
+		tokens = append(tokens, current.String())
 	}
 
 	return tokens
