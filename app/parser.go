@@ -5,9 +5,15 @@ import "strings"
 func parse(input string) []string {
 	var tokens []string
 	var current strings.Builder
-	var inSingleQuotes, inDoubleQuotes bool
+	var inSingleQuotes, inDoubleQuotes, escaped bool
 	for _, r := range input {
 		switch {
+		case escaped:
+			current.WriteRune(r)
+			escaped = false
+		case r == '\\':
+			escaped = true
+
 		case r == '"' && !inDoubleQuotes && !inSingleQuotes:
 			inDoubleQuotes = true
 
