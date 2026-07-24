@@ -11,7 +11,7 @@ func parse(input string) []string {
 		case escaped:
 			current.WriteRune(r)
 			escaped = false
-		case r == '\\':
+		case !inSingleQuotes && r == '\\':
 			escaped = true
 
 		case r == '"' && !inDoubleQuotes && !inSingleQuotes:
