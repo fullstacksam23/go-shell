@@ -25,7 +25,7 @@ func CheckType(args []string, writer io.Writer) {
 	} else {
 		found, path := pathutil.FindExecutable(command)
 		if found {
-			data = fmt.Sprintf("%s is %s\n", command, path)
+			data = fmt.Sprintf("%s is %s", command, path)
 		} else {
 			data = command + ": not found"
 		}
