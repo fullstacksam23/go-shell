@@ -10,6 +10,7 @@ type ParsedCommand struct {
 	Args           []string
 	StdoutFile     string
 	StdoutRedirect bool
+	StdoutAppend   bool
 	StderrFile     string
 	StdErrRedirect bool
 }
@@ -24,7 +25,7 @@ func parse(tokens []string) (*ParsedCommand, error) {
 	stdoutRedirect := -1
 	stderrRedirect := -1
 	for i, v := range tokens {
-		if v == ">" || v == "1>" {
+		if v == ">" || v == "1>" || v == ">>" || v == "1>>" {
 			stdoutRedirect = i
 		}
 		if v == "2>" {
@@ -42,7 +43,11 @@ func parse(tokens []string) (*ParsedCommand, error) {
 
 		p.Args = tokens[1:stdoutRedirect]
 		p.StdoutFile = tokens[stdoutRedirect+1]
-		p.StdoutRedirect = true
+		if tokens[stdoutRedirect] == ">>" || tokens[stdoutRedirect] == "1>>" {
+			p.StdoutAppend = true
+		} else {
+			p.StdoutRedirect = true
+		}
 	}
 
 	if stderrRedirect != -1 {

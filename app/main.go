@@ -31,23 +31,36 @@ func main() {
 		stdoutWriter := io.Writer(os.Stdout)
 		stderrWriter := io.Writer(os.Stderr)
 
-		var file *os.File
+		var stdoutFile *os.File
+		var stderrFile *os.File
 
 		if cmd.StdoutRedirect {
-			file, err = os.Create(cmd.StdoutFile)
+			stdoutFile, err = os.Create(cmd.StdoutFile)
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
-			stdoutWriter = file
+			stdoutWriter = stdoutFile
+		}
+		if cmd.StdoutAppend {
+			stdoutFile, err = os.OpenFile(
+				cmd.StdoutFile,
+				os.O_CREATE|os.O_WRONLY|os.O_APPEND,
+				0644,
+			)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			stdoutWriter = stdoutFile
 		}
 		if cmd.StdErrRedirect {
-			file, err = os.Create(cmd.StderrFile)
+			stderrFile, err = os.Create(cmd.StderrFile)
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
-			stderrWriter = file
+			stderrWriter = stderrFile
 		}
 		switch cmd.Command {
 		case "echo":
@@ -68,12 +81,11 @@ func main() {
 
 		}
 
-		if cmd.StdoutRedirect {
-			file.Close()
+		if cmd.StdoutRedirect || cmd.StdoutAppend {
+			stdoutFile.Close()
 		}
 		if cmd.StdErrRedirect {
-			file.Close()
+			stderrFile.Close()
 		}
-
 	}
 }
