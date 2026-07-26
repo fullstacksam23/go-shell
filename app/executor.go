@@ -23,6 +23,10 @@ func executor(command string, args []string, writer io.Writer) error {
 
 	err := cmd.Run()
 	if err != nil {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			return nil // suppress exit status
+		}
 		return err
 	}
 	return nil
