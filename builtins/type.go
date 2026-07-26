@@ -2,11 +2,12 @@ package builtins
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/codecrafters-io/shell-starter-go/pathutil"
 )
 
-func CheckType(args []string) {
+func CheckType(args []string, writer io.Writer) {
 	if len(args) > 1 {
 		fmt.Println("Type command accepts a single parameter")
 		return
@@ -17,15 +18,21 @@ func CheckType(args []string) {
 	}
 	command := args[0]
 
+	var data string
 	_, ok := BuiltIn[command]
 	if ok {
-		fmt.Println(command + " is a shell builtin")
-		return
-	}
-	found, path := pathutil.FindExecutable(command)
-	if found {
-		fmt.Printf("%s is %s\n", command, path)
+		data = command + " is a shell builtin"
 	} else {
-		fmt.Println(command + ": not found")
+		found, path := pathutil.FindExecutable(command)
+		if found {
+			data = fmt.Sprintf("%s is %s\n", command, path)
+		} else {
+			data = command + ": not found"
+		}
+	}
+
+	_, err := io.WriteString(writer, data+"\n")
+	if err != nil {
+		fmt.Println(err)
 	}
 }

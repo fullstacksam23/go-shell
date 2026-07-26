@@ -1,28 +1,29 @@
 package main
 
 import (
-	"fmt"
+	"errors"
+	"io"
 	"os"
 	"os/exec"
 
 	"github.com/codecrafters-io/shell-starter-go/pathutil"
 )
 
-func executor(command string, args []string) {
+func executor(command string, args []string, writer io.Writer) error {
 
 	isExecutable, _ := pathutil.FindExecutable(command)
 	if !isExecutable {
-		fmt.Println(command + ": not found")
-		return
+		return errors.New(command + ": not found")
 	}
 
 	cmd := exec.Command(command, args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
+	cmd.Stdout = writer
 
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
+	return nil
 }

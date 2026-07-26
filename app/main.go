@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -19,23 +20,47 @@ func main() {
 			return
 		}
 
-		items := parse(strings.TrimSpace(input))
-		command := items[0]
-		args := items[1:]
+		items := tokenize(strings.TrimSpace(input))
 
-		switch command {
+		cmd, err := parse(items)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		writer := io.Writer(os.Stdout)
+		var file *os.File
+
+		if cmd.StdoutRedirect {
+			file, err = os.Create(cmd.StdoutFile)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			writer = file
+		}
+
+		switch cmd.Command {
 		case "echo":
-			builtins.Echo(args)
+			builtins.Echo(cmd.Args, writer)
 		case "type":
-			builtins.CheckType(args)
+			builtins.CheckType(cmd.Args, writer)
 		case "pwd":
-			builtins.Pwd()
+			builtins.Pwd(writer)
 		case "cd":
-			builtins.Cd(args)
+			builtins.Cd(cmd.Args)
 		case "exit":
 			return
 		default:
-			executor(command, args)
+
+			if err := executor(cmd.Command, cmd.Args, writer); err != nil {
+				fmt.Println(err)
+			}
+
+		}
+
+		if cmd.StdoutRedirect {
+			file.Close()
 		}
 
 	}

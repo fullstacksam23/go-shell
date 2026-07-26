@@ -2,42 +2,14 @@ package builtins
 
 import (
 	"fmt"
-	"os"
+	"io"
 	"strings"
 )
 
-func Echo(args []string) {
-	redirect := -1
-	for i, v := range args {
-		if v == ">" || v == "1>" {
-			redirect = i
-			break
-		}
-	}
-	if redirect == -1 {
-		fmt.Println(strings.Join(args, " "))
-		return
-	}
-
-	if redirect+1 >= len(args) {
-		fmt.Println("echo: missing file operand")
-		return
-	}
-
-	output := strings.Join(args[:redirect], " ")
-	fileName := args[redirect+1]
-
-	file, err := os.Create(fileName)
+func Echo(args []string, writer io.Writer) {
+	_, err := io.WriteString(writer, strings.Join(args, " ")+"\n")
 	if err != nil {
-		fmt.Println("Error: ", err)
+		fmt.Println(err)
 		return
 	}
-	defer file.Close()
-
-	_, err = file.WriteString(output)
-	if err != nil {
-		fmt.Println("Error: ", err)
-		return
-	}
-
 }

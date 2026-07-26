@@ -2,14 +2,18 @@ package builtins
 
 import (
 	"fmt"
+	"io"
 	"os"
 )
 
-func Pwd() {
+func Pwd(writer io.Writer) {
 	wd, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(wd)
+	_, err = io.WriteString(writer, wd+"\n")
+	if err != nil {
+		fmt.Println(err)
+	}
 }

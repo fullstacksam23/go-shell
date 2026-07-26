@@ -1,8 +1,42 @@
 package main
 
-import "strings"
+import (
+	"errors"
+	"strings"
 
-func parse(input string) []string {
+	"github.com/codecrafters-io/shell-starter-go/core"
+)
+
+func parse(tokens []string) (*core.ParsedCommand, error) {
+	if len(tokens) < 1 {
+		return nil, errors.New("missing input")
+	}
+	p := core.ParsedCommand{
+		Command: tokens[0],
+	}
+	redirect := -1
+	for i, v := range tokens {
+		if v == ">" || v == "1>" {
+			redirect = i
+			break
+		}
+	}
+	if redirect == -1 {
+		p.Args = tokens[1:]
+		return &p, nil
+	}
+	if redirect+1 >= len(tokens) {
+		return nil, errors.New("echo: missing file operand")
+	}
+
+	p.Args = tokens[1:redirect]
+	p.StdoutFile = tokens[redirect+1]
+	p.StdoutRedirect = true
+	return &p, nil
+
+}
+
+func tokenize(input string) []string {
 	var tokens []string
 	var current strings.Builder
 	var inSingleQuotes, inDoubleQuotes, escaped bool
