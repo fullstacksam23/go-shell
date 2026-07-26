@@ -13,6 +13,7 @@ type ParsedCommand struct {
 	StdoutAppend   bool
 	StderrFile     string
 	StdErrRedirect bool
+	StdErrAppend   bool
 }
 
 func parse(tokens []string) (*ParsedCommand, error) {
@@ -28,7 +29,7 @@ func parse(tokens []string) (*ParsedCommand, error) {
 		if v == ">" || v == "1>" || v == ">>" || v == "1>>" {
 			stdoutRedirect = i
 		}
-		if v == "2>" {
+		if v == "2>" || v == "2>>" {
 			stderrRedirect = i
 		}
 	}
@@ -38,7 +39,7 @@ func parse(tokens []string) (*ParsedCommand, error) {
 	} else {
 
 		if stdoutRedirect+1 >= len(tokens) {
-			return nil, errors.New("echo: missing file operand")
+			return nil, errors.New("missing file operand")
 		}
 
 		p.Args = tokens[1:stdoutRedirect]
@@ -58,7 +59,12 @@ func parse(tokens []string) (*ParsedCommand, error) {
 			return nil, errors.New("missing file operand")
 		}
 		p.StderrFile = tokens[stderrRedirect+1]
-		p.StdErrRedirect = true
+
+		if tokens[stderrRedirect] == "2>" {
+			p.StdErrRedirect = true
+		} else {
+			p.StdErrAppend = true
+		}
 	}
 	return &p, nil
 

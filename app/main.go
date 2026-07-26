@@ -50,7 +50,7 @@ func main() {
 			)
 			if err != nil {
 				fmt.Println(err)
-				return
+				continue
 			}
 			stdoutWriter = stdoutFile
 		}
@@ -62,6 +62,19 @@ func main() {
 			}
 			stderrWriter = stderrFile
 		}
+		if cmd.StdErrAppend {
+			stderrFile, err = os.OpenFile(
+				cmd.StderrFile,
+				os.O_CREATE|os.O_WRONLY|os.O_APPEND,
+				0644,
+			)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			stderrWriter = stderrFile
+		}
+
 		switch cmd.Command {
 		case "echo":
 			builtins.Echo(cmd.Args, stdoutWriter)
