@@ -9,7 +9,7 @@ import (
 	"github.com/codecrafters-io/shell-starter-go/pathutil"
 )
 
-func executor(command string, args []string, writer io.Writer) error {
+func executor(command string, args []string, stdoutWriter, stderrWriter io.Writer) error {
 
 	isExecutable, _ := pathutil.FindExecutable(command)
 	if !isExecutable {
@@ -18,8 +18,8 @@ func executor(command string, args []string, writer io.Writer) error {
 
 	cmd := exec.Command(command, args...)
 	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = writer
+	cmd.Stderr = stderrWriter
+	cmd.Stdout = stdoutWriter
 
 	err := cmd.Run()
 	if err != nil {

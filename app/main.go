@@ -28,7 +28,9 @@ func main() {
 			continue
 		}
 
-		writer := io.Writer(os.Stdout)
+		stdoutWriter := io.Writer(os.Stdout)
+		stderrWriter := io.Writer(os.Stderr)
+
 		var file *os.File
 
 		if cmd.StdoutRedirect {
@@ -37,29 +39,39 @@ func main() {
 				fmt.Println(err)
 				continue
 			}
-			writer = file
+			stdoutWriter = file
 		}
-
+		if cmd.StdErrRedirect {
+			file, err = os.Create(cmd.StderrFile)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			stderrWriter = file
+		}
 		switch cmd.Command {
 		case "echo":
-			builtins.Echo(cmd.Args, writer)
+			builtins.Echo(cmd.Args, stdoutWriter)
 		case "type":
-			builtins.CheckType(cmd.Args, writer)
+			builtins.CheckType(cmd.Args, stdoutWriter, stderrWriter)
 		case "pwd":
-			builtins.Pwd(writer)
+			builtins.Pwd(stdoutWriter)
 		case "cd":
-			builtins.Cd(cmd.Args)
+			builtins.Cd(cmd.Args, stderrWriter)
 		case "exit":
 			return
 		default:
 
-			if err := executor(cmd.Command, cmd.Args, writer); err != nil {
+			if err := executor(cmd.Command, cmd.Args, stdoutWriter, stderrWriter); err != nil {
 				fmt.Println(err)
 			}
 
 		}
 
 		if cmd.StdoutRedirect {
+			file.Close()
+		}
+		if cmd.StdErrRedirect {
 			file.Close()
 		}
 

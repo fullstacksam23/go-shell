@@ -7,13 +7,14 @@ import (
 	"github.com/codecrafters-io/shell-starter-go/pathutil"
 )
 
-func CheckType(args []string, writer io.Writer) {
+func CheckType(args []string, stdoutWriter, stderrWriter io.Writer) {
 	if len(args) > 1 {
-		fmt.Println("Type command accepts a single parameter")
+		io.WriteString(stderrWriter, fmt.Sprintln("Type: command accepts a single parameter"))
 		return
 	}
 
 	if len(args) != 1 {
+		io.WriteString(stderrWriter, fmt.Sprintln("Type: Requires one parameter"))
 		return
 	}
 	command := args[0]
@@ -31,8 +32,8 @@ func CheckType(args []string, writer io.Writer) {
 		}
 	}
 
-	_, err := io.WriteString(writer, data+"\n")
+	_, err := io.WriteString(stdoutWriter, data+"\n")
 	if err != nil {
-		fmt.Println(err)
+		io.WriteString(stderrWriter, fmt.Sprintln(err))
 	}
 }

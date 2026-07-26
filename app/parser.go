@@ -3,35 +3,58 @@ package main
 import (
 	"errors"
 	"strings"
-
-	"github.com/codecrafters-io/shell-starter-go/core"
 )
 
-func parse(tokens []string) (*core.ParsedCommand, error) {
+type ParsedCommand struct {
+	Command        string
+	Args           []string
+	StdoutFile     string
+	StdoutRedirect bool
+	StderrFile     string
+	StdErrRedirect bool
+}
+
+func parse(tokens []string) (*ParsedCommand, error) {
 	if len(tokens) < 1 {
 		return nil, errors.New("missing input")
 	}
-	p := core.ParsedCommand{
+	p := ParsedCommand{
 		Command: tokens[0],
 	}
-	redirect := -1
+	stdoutRedirect := -1
+	stderrRedirect := -1
 	for i, v := range tokens {
 		if v == ">" || v == "1>" {
-			redirect = i
-			break
+			stdoutRedirect = i
+		}
+		if v == "2>" {
+			stderrRedirect = i
 		}
 	}
-	if redirect == -1 {
+
+	if stdoutRedirect == -1 {
 		p.Args = tokens[1:]
-		return &p, nil
-	}
-	if redirect+1 >= len(tokens) {
-		return nil, errors.New("echo: missing file operand")
+	} else {
+
+		if stdoutRedirect+1 >= len(tokens) {
+			return nil, errors.New("echo: missing file operand")
+		}
+
+		p.Args = tokens[1:stdoutRedirect]
+		p.StdoutFile = tokens[stdoutRedirect+1]
+		p.StdoutRedirect = true
 	}
 
-	p.Args = tokens[1:redirect]
-	p.StdoutFile = tokens[redirect+1]
-	p.StdoutRedirect = true
+	if stderrRedirect != -1 {
+		if stdoutRedirect == -1 || stderrRedirect < stdoutRedirect {
+			p.Args = tokens[1:stderrRedirect]
+		}
+		if stderrRedirect+1 >= len(tokens) {
+			return nil, errors.New("missing file operand")
+		}
+		p.StderrFile = tokens[stderrRedirect+1]
+		p.StdErrRedirect = true
+	}
 	return &p, nil
 
 }

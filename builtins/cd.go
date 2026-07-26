@@ -2,21 +2,20 @@ package builtins
 
 import (
 	"fmt"
+	"io"
 	"os"
 )
 
-func Cd(args []string) {
+func Cd(args []string, stderrWriter io.Writer) {
 	if len(args) != 1 {
-		fmt.Println("cd: requires one argument")
-		fmt.Println(args)
-		fmt.Println(len(args))
+		io.WriteString(stderrWriter, "cd: requires one argument\n")
 		return
 	}
 	dir := args[0]
 	if dir == "~" {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			fmt.Printf("cd: %s: No such file or directory\n", dir)
+			io.WriteString(stderrWriter, fmt.Sprintf("cd: %s: No such file or directory\n", dir))
 			return
 		}
 		dir = home
@@ -24,16 +23,16 @@ func Cd(args []string) {
 
 	info, err := os.Stat(dir)
 	if err != nil {
-		fmt.Printf("cd: %s: No such file or directory\n", dir)
+		io.WriteString(stderrWriter, fmt.Sprintf("cd: %s: No such file or directory\n", dir))
 		return
 	}
 	if info.IsDir() {
 		err = os.Chdir(dir)
 		if err != nil {
-			fmt.Println(err)
+			io.WriteString(stderrWriter, fmt.Sprintln(err))
 			return
 		}
 	} else {
-		fmt.Printf("cd: %s: No such file or directory\n", dir)
+		io.WriteString(stderrWriter, fmt.Sprintf("cd: %s: No such file or directory\n", dir))
 	}
 }
