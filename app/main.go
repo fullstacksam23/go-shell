@@ -1,20 +1,28 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 
 	"github.com/codecrafters-io/shell-starter-go/builtins"
+	"golang.org/x/term"
 )
 
 func main() {
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		panic(err)
+	}
+	defer term.Restore(int(os.Stdin.Fd()), oldState)
+
+	SetupAutoComplete()
 
 	for {
 		fmt.Print("$ ")
-		input, err := bufio.NewReader(os.Stdin).ReadString('\n')
+		input, err := ReadLine()
+
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -99,6 +107,47 @@ func main() {
 		}
 		if cmd.StdErrRedirect {
 			stderrFile.Close()
+		}
+	}
+}
+
+func ReadLine() (string, error) {
+	var line []byte
+	buf := make([]byte, 1)
+
+	for {
+		_, err := os.Stdin.Read(buf)
+		if err != nil {
+			return "", err
+		}
+
+		switch buf[0] {
+
+		case '\r', '\n':
+			fmt.Println()
+			return string(line), nil
+
+		case '\t':
+			// autocomplete
+			completed := autocomplete(string(line))
+
+			// erase current line
+			fmt.Print("\r$ ")
+			fmt.Print(strings.Repeat(" ", len(line)))
+			fmt.Print("\r$ ")
+
+			line = []byte(completed)
+			fmt.Print(completed)
+
+		case 127: // backspace
+			if len(line) > 0 {
+				line = line[:len(line)-1]
+				fmt.Print("\b \b")
+			}
+
+		default:
+			line = append(line, buf[0])
+			fmt.Printf("%c", buf[0])
 		}
 	}
 }
