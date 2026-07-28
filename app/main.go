@@ -11,17 +11,20 @@ import (
 )
 
 func main() {
-	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
-	if err != nil {
-		panic(err)
-	}
-	defer term.Restore(int(os.Stdin.Fd()), oldState)
 
 	SetupAutoComplete()
 
 	for {
+
+		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+		if err != nil {
+			panic(err)
+		}
+
 		fmt.Print("$ ")
 		input, err := ReadLine()
+
+		term.Restore(int(os.Stdin.Fd()), oldState)
 
 		if err != nil {
 			fmt.Println(err)
@@ -124,7 +127,7 @@ func ReadLine() (string, error) {
 		switch buf[0] {
 
 		case '\r', '\n':
-			fmt.Print("\r\n")
+			fmt.Println()
 			return string(line), nil
 
 		case '\t':
