@@ -1,6 +1,9 @@
 package main
 
-import "github.com/codecrafters-io/shell-starter-go/builtins"
+import (
+	"github.com/chzyer/readline"
+	"github.com/codecrafters-io/shell-starter-go/builtins"
+)
 
 type TrieNode struct {
 	children map[rune]*TrieNode
@@ -20,7 +23,7 @@ func SetupAutoComplete() {
 		},
 	}
 
-	for k, _ := range builtins.BuiltIn {
+	for k := range builtins.BuiltIn {
 		node := currTrie.root
 		for _, r := range k {
 			if node.children[r] == nil {
@@ -34,29 +37,46 @@ func SetupAutoComplete() {
 	}
 }
 
-func autocomplete(line string) string {
+func autocompleteSuffix(line string) string {
 	curr := currTrie.root
 
-	for i, r := range line {
-		// no match
+	for _, r := range line {
 		if curr.children[r] == nil {
-			return line[:i+1]
+			return ""
 		}
 		curr = curr.children[r]
 	}
-	//check if the user typed the whole command
+
 	if curr.isEnd {
-		return line + " "
+		return " "
 	}
-	return line + dfs(curr) + " "
+
+	return dfs(curr) + " "
 }
 
 func dfs(node *TrieNode) string {
 	if node.isEnd {
 		return ""
 	}
-	for r, v := range node.children {
-		return string(r) + dfs(v)
+
+	for r, child := range node.children {
+		return string(r) + dfs(child)
 	}
+
 	return ""
 }
+
+type TrieCompleter struct{}
+
+func (t *TrieCompleter) Do(line []rune, pos int) ([][]rune, int) {
+	prefix := string(line[:pos])
+
+	suffix := autocompleteSuffix(prefix)
+	if suffix == "" {
+		return nil, 0
+	}
+
+	return [][]rune{[]rune(suffix)}, 0
+}
+
+var completer readline.AutoCompleter = &TrieCompleter{}
