@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/chzyer/readline"
 	"github.com/codecrafters-io/shell-starter-go/builtins"
 )
@@ -73,6 +75,7 @@ func (t *TrieCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	suffix := autocompleteSuffix(prefix)
 	if suffix == "" {
+		fmt.Print("\x07")
 		return nil, 0
 	}
 
