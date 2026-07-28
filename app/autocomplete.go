@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
 
 	"github.com/chzyer/readline"
 	"github.com/codecrafters-io/shell-starter-go/builtins"
@@ -26,16 +29,56 @@ func SetupAutoComplete() {
 	}
 
 	for k := range builtins.BuiltIn {
-		node := currTrie.root
-		for _, r := range k {
-			if node.children[r] == nil {
-				node.children[r] = &TrieNode{
-					children: make(map[rune]*TrieNode),
+		insertTrie(k)
+	}
+	loadExecutables()
+}
+
+func insertTrie(elem string) {
+	node := currTrie.root
+	for _, r := range elem {
+		if node.children[r] == nil {
+			node.children[r] = &TrieNode{
+				children: make(map[rune]*TrieNode),
+			}
+		}
+		node = node.children[r]
+	}
+	node.isEnd = true
+}
+
+func loadExecutables() {
+	pathEnv := os.Getenv("PATH")
+
+	for _, dir := range filepath.SplitList(pathEnv) {
+		dirs, err := os.ReadDir(dir)
+		if err != nil {
+			continue
+		}
+
+		for _, entry := range dirs {
+			if entry.IsDir() {
+				continue
+			}
+
+			info, err := entry.Info()
+			if err != nil {
+				continue
+			}
+
+			// Ignore non-executables
+			if runtime.GOOS == "windows" {
+				if filepath.Ext(entry.Name()) != ".exe" {
+					continue
+				}
+			} else {
+				if info.Mode()&0111 == 0 {
+					continue
 				}
 			}
-			node = node.children[r]
+
+			insertTrie(entry.Name())
 		}
-		node.isEnd = true
 	}
 }
 
