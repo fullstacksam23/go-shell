@@ -124,7 +124,7 @@ func ReadLine() (string, error) {
 		switch buf[0] {
 
 		case '\r', '\n':
-			fmt.Println()
+			fmt.Print("\r\n")
 			return string(line), nil
 
 		case '\t':
