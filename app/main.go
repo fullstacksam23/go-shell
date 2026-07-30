@@ -127,8 +127,15 @@ func main() {
 						fmt.Print(string(line))
 						lastWasTab = false
 					} else {
-						fmt.Print("\a")
-						lastWasTab = true
+						lcp := longestCommonPrefixOf(matches)
+						if len(lcp) > 0 {
+							fmt.Print(lcp)
+							line = append(line, []rune(lcp)...)
+							lastWasTab = false
+						} else {
+							fmt.Print("\a")
+							lastWasTab = true
+						}
 					}
 
 				}

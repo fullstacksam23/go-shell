@@ -144,3 +144,18 @@ func autoCompleteFileName(path, word string) []string {
 	slices.Sort(matches)
 	return matches
 }
+
+func longestCommonPrefixOf(strs []string) string {
+	if len(strs) == 0 {
+		return ""
+	}
+	lcp := strs[0]
+	for _, s := range strs[1:] {
+		i := 0
+		for i < len(lcp) && i < len(s) && lcp[i] == s[i] {
+			i++
+		}
+		lcp = lcp[:i]
+	}
+	return lcp
+}
