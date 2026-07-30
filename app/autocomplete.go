@@ -141,5 +141,6 @@ func autoCompleteFileName(path, word string) []string {
 		}
 
 	}
+	slices.Sort(matches)
 	return matches
 }

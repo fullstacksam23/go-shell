@@ -124,8 +124,10 @@ func main() {
 						fmt.Print("$ ")
 						fmt.Print(string(line))
 						lastWasTab = false
+					} else {
+						fmt.Print("\a")
+						lastWasTab = true
 					}
-					lastWasTab = true
 
 				}
 			}
