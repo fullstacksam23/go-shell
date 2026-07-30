@@ -221,6 +221,8 @@ func processCommand(input string) bool {
 		builtins.Pwd(stdoutWriter)
 	case "cd":
 		builtins.Cd(cmd.Args, stderrWriter)
+	case "complete":
+		builtins.Complete(cmd.Args, stdoutWriter, stderrWriter)
 	case "exit":
 		return true
 	default:
