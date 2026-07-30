@@ -106,11 +106,28 @@ func main() {
 					fmt.Print("\a")
 					lastWasTab = false
 					continue
+				} else if len(matches) == 1 {
+					suffix := matches[0]
+					fmt.Print(suffix)
+					line = append(line, []rune(suffix)...)
+					//check if it is a file
+					if suffix[len(suffix)-1] != '/' {
+						fmt.Print(" ")
+						line = append(line, ' ')
+					}
+					lastWasTab = false
+				} else {
+					if lastWasTab {
+						fmt.Print("\r\n")
+						fmt.Print(strings.Join(matches, "  "))
+						fmt.Print("\r\n")
+						fmt.Print("$ ")
+						fmt.Print(string(line))
+						lastWasTab = false
+					}
+					lastWasTab = true
+
 				}
-				suffix := matches[0]
-				fmt.Print(suffix)
-				line = append(line, []rune(suffix)...)
-				lastWasTab = false
 			}
 		case 127, 8:
 			if len(line) > 0 {

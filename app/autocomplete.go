@@ -136,7 +136,7 @@ func autoCompleteFileName(path, word string) []string {
 			if d.IsDir() {
 				matches = append(matches, d.Name()[len(word):]+"/")
 			} else {
-				matches = append(matches, d.Name()[len(word):]+" ")
+				matches = append(matches, d.Name()[len(word):])
 			}
 		}
 
