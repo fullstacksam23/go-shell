@@ -35,7 +35,7 @@ func main() {
 		switch ch {
 
 		case '\r', '\n':
-			fmt.Println()
+			fmt.Print("\r\n")
 
 			input := string(line)
 
@@ -66,12 +66,11 @@ func main() {
 			default:
 				if lastWasTab {
 
-					fmt.Println()
-
+					fmt.Print("\r\n")
 					for _, m := range matches {
 						fmt.Print(string(line) + m + "  ")
 					}
-					fmt.Printf("\b\b\n")
+					fmt.Print("\b\b\r\n")
 					fmt.Print("$ ")
 					fmt.Print(string(line))
 
