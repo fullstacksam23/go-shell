@@ -92,11 +92,6 @@ func main() {
 				}
 			} else {
 
-				if word == "" {
-					fmt.Print("\a")
-					lastWasTab = false
-					continue
-				}
 				//get the path
 				path_items := strings.Split(word, "/")
 				matches := []string{}
