@@ -22,7 +22,8 @@ func main() {
 	line := []rune{}
 	lastWasTab := false
 	buf := make([]byte, 1)
-	fmt.Print("$ ")
+	stdout := crlfWriter{os.Stdout}
+	fmt.Fprint(stdout, "$ ")
 
 	for {
 		_, err := os.Stdin.Read(buf)
@@ -104,12 +105,12 @@ func processCommand(input string) bool {
 
 	cmd, err := parse(items)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(crlfWriter{os.Stderr}, err)
 		return false
 	}
 
-	stdoutWriter := io.Writer(os.Stdout)
-	stderrWriter := io.Writer(os.Stderr)
+	stdoutWriter := io.Writer(crlfWriter{os.Stdout})
+	stderrWriter := io.Writer(crlfWriter{os.Stderr})
 
 	var stdoutFile *os.File
 	var stderrFile *os.File
@@ -117,7 +118,7 @@ func processCommand(input string) bool {
 	if cmd.StdoutRedirect {
 		stdoutFile, err = os.Create(cmd.StdoutFile)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(crlfWriter{os.Stderr}, err)
 			return false
 		}
 		stdoutWriter = stdoutFile
@@ -129,7 +130,7 @@ func processCommand(input string) bool {
 			0644,
 		)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(crlfWriter{os.Stderr}, err)
 			return false
 		}
 		stdoutWriter = stdoutFile
@@ -137,7 +138,7 @@ func processCommand(input string) bool {
 	if cmd.StdErrRedirect {
 		stderrFile, err = os.Create(cmd.StderrFile)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(crlfWriter{os.Stderr}, err)
 			return false
 		}
 		stderrWriter = stderrFile
@@ -149,7 +150,7 @@ func processCommand(input string) bool {
 			0644,
 		)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(crlfWriter{os.Stderr}, err)
 			return false
 		}
 		stderrWriter = stderrFile
@@ -169,7 +170,7 @@ func processCommand(input string) bool {
 	default:
 
 		if err := executor(cmd.Command, cmd.Args, stdoutWriter, stderrWriter); err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(crlfWriter{os.Stderr}, err)
 		}
 
 	}
