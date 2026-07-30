@@ -1,12 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 
-	"github.com/chzyer/readline"
 	"github.com/codecrafters-io/shell-starter-go/builtins"
 )
 
@@ -82,47 +81,32 @@ func loadExecutables() {
 	}
 }
 
-func autocompleteSuffix(line string) string {
+func autocompleteSuffix(line string) []string {
 	curr := currTrie.root
 
 	for _, r := range line {
-		if curr.children[r] == nil {
-			return ""
+		next, ok := curr.children[r]
+		if !ok {
+			return nil
 		}
-		curr = curr.children[r]
+		curr = next
 	}
 
-	if curr.isEnd {
-		return " "
-	}
-
-	return dfs(curr) + " "
+	matches := dfs(curr, []rune{}, nil)
+	slices.Sort(matches)
+	return matches
 }
 
-func dfs(node *TrieNode) string {
+func dfs(node *TrieNode, curr []rune, matches []string) []string {
 	if node.isEnd {
-		return ""
+		matches = append(matches, string(curr))
 	}
 
 	for r, child := range node.children {
-		return string(r) + dfs(child)
+		curr = append(curr, r)
+		matches = dfs(child, curr, matches)
+		curr = curr[:len(curr)-1]
 	}
 
-	return ""
+	return matches
 }
-
-type TrieCompleter struct{}
-
-func (t *TrieCompleter) Do(line []rune, pos int) ([][]rune, int) {
-	prefix := string(line[:pos])
-
-	suffix := autocompleteSuffix(prefix)
-	if suffix == "" {
-		fmt.Print("\x07")
-		return nil, 0
-	}
-
-	return [][]rune{[]rune(suffix)}, 0
-}
-
-var completer readline.AutoCompleter = &TrieCompleter{}
