@@ -60,6 +60,7 @@ func main() {
 			case 1:
 				suffix := matches[0]
 				line = append(line, []rune(suffix)...)
+				line = append(line, ' ')
 				fmt.Print(suffix + " ")
 				lastWasTab = false
 
