@@ -50,7 +50,7 @@ func main() {
 			fmt.Print("$ ")
 
 		case '\t':
-			matches := autocompleteSuffix(string(line))
+			longestCommonPrefix, matches := autocompleteSuffix(string(line))
 
 			switch len(matches) {
 
@@ -66,8 +66,12 @@ func main() {
 				lastWasTab = false
 
 			default:
-				if lastWasTab {
-
+				if len(longestCommonPrefix) > 0 {
+					// extend to the common prefix, no trailing space (still ambiguous)
+					fmt.Print(string(longestCommonPrefix))
+					line = append(line, longestCommonPrefix...)
+					lastWasTab = false
+				} else if lastWasTab {
 					fmt.Print("\r\n")
 					for _, m := range matches {
 						fmt.Print(string(line) + m + "  ")
@@ -75,15 +79,12 @@ func main() {
 					fmt.Print("\b\b\r\n")
 					fmt.Print("$ ")
 					fmt.Print(string(line))
-
 					lastWasTab = false
-
 				} else {
 					fmt.Print("\a")
 					lastWasTab = true
 				}
 			}
-
 		case 127, 8:
 			if len(line) > 0 {
 				line = line[:len(line)-1]

@@ -81,20 +81,30 @@ func loadExecutables() {
 	}
 }
 
-func autocompleteSuffix(line string) []string {
+func autocompleteSuffix(line string) ([]rune, []string) {
 	curr := currTrie.root
 
 	for _, r := range line {
 		next, ok := curr.children[r]
 		if !ok {
-			return nil
+			return nil, nil
 		}
 		curr = next
 	}
-
+	node := curr
 	matches := dfs(curr, []rune{}, nil)
 	slices.Sort(matches)
-	return matches
+
+	longestCommon := make([]rune, 0)
+	for len(node.children) == 1 && !node.isEnd {
+		var nxt *TrieNode
+		for k, v := range node.children {
+			longestCommon = append(longestCommon, k)
+			nxt = v
+		}
+		node = nxt
+	}
+	return longestCommon, matches
 }
 
 func dfs(node *TrieNode, curr []rune, matches []string) []string {
