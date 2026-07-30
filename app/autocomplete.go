@@ -123,9 +123,9 @@ func dfs(node *TrieNode, curr []rune, matches []string) []string {
 	return matches
 }
 
-func autoCompleteArgument(word string) []string {
+func autoCompleteFileName(path, word string) []string {
 	matches := []string{}
-	dirs, err := os.ReadDir(".")
+	dirs, err := os.ReadDir(path)
 	if err != nil {
 		fmt.Fprintln(crlfWriter{os.Stderr}, err)
 		return matches

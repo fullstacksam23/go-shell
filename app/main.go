@@ -91,7 +91,22 @@ func main() {
 					}
 				}
 			} else {
-				matches := autoCompleteArgument(word)
+
+				if word == "" {
+					fmt.Print("\a")
+					lastWasTab = false
+					continue
+				}
+				//get the path
+				path_items := strings.Split(word, "/")
+				matches := []string{}
+				n := len(path_items)
+				if n == 1 {
+					matches = autoCompleteFileName(".", word)
+				} else {
+					matches = autoCompleteFileName(strings.Join(path_items[:n-1], "/"), path_items[n-1])
+				}
+
 				if len(matches) == 0 {
 					fmt.Print("\a")
 					lastWasTab = false
