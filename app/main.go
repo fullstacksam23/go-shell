@@ -119,8 +119,10 @@ func main() {
 				} else {
 					if lastWasTab {
 						fmt.Print("\r\n")
-						fmt.Print(strings.Join(matches, "  "))
-						fmt.Print("\r\n")
+						for _, m := range matches {
+							fmt.Print(string(word) + m + "  ")
+						}
+						fmt.Print("\b\b\r\n")
 						fmt.Print("$ ")
 						fmt.Print(string(line))
 						lastWasTab = false
