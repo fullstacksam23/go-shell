@@ -131,11 +131,15 @@ func autoCompleteFileName(path, word string) []string {
 		return matches
 	}
 	for _, d := range dirs {
-		if !d.IsDir() {
-			if strings.HasPrefix(d.Name(), word) {
-				matches = append(matches, d.Name()[len(word):])
+
+		if strings.HasPrefix(d.Name(), word) {
+			if d.IsDir() {
+				matches = append(matches, d.Name()[len(word):]+"/")
+			} else {
+				matches = append(matches, d.Name()[len(word):]+" ")
 			}
 		}
+
 	}
 	return matches
 }

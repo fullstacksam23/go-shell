@@ -113,9 +113,8 @@ func main() {
 					continue
 				}
 				suffix := matches[0]
-				fmt.Print(suffix + " ")
+				fmt.Print(suffix)
 				line = append(line, []rune(suffix)...)
-				line = append(line, ' ')
 				lastWasTab = false
 			}
 		case 127, 8:
