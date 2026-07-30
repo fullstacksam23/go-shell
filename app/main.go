@@ -21,6 +21,7 @@ func main() {
 
 	line := []rune{}
 	lastWasTab := false
+
 	buf := make([]byte, 1)
 	stdout := crlfWriter{os.Stdout}
 	fmt.Fprint(stdout, "$ ")
@@ -50,40 +51,57 @@ func main() {
 			fmt.Print("$ ")
 
 		case '\t':
-			longestCommonPrefix, matches := autocompleteSuffix(string(line))
+			prefix, word := splitLastWord(line)
 
-			switch len(matches) {
+			if prefix == "" {
 
-			case 0:
-				fmt.Print("\a")
-				lastWasTab = false
+				longestCommonPrefix, matches := autoCompleteCommand(string(word))
 
-			case 1:
+				switch len(matches) {
+
+				case 0:
+					fmt.Print("\a")
+					lastWasTab = false
+
+				case 1:
+					suffix := matches[0]
+					line = append(line, []rune(suffix)...)
+					line = append(line, ' ')
+					fmt.Print(suffix + " ")
+					lastWasTab = false
+
+				default:
+					if len(longestCommonPrefix) > 0 {
+						// extend to the common prefix, no trailing space (still ambiguous)
+						fmt.Print(string(longestCommonPrefix))
+						line = append(line, longestCommonPrefix...)
+						lastWasTab = false
+					} else if lastWasTab {
+						fmt.Print("\r\n")
+						for _, m := range matches {
+							fmt.Print(string(line) + m + "  ")
+						}
+						fmt.Print("\b\b\r\n")
+						fmt.Print("$ ")
+						fmt.Print(string(line))
+						lastWasTab = false
+					} else {
+						fmt.Print("\a")
+						lastWasTab = true
+					}
+				}
+			} else {
+				matches := autoCompleteArgument(word)
+				if len(matches) == 0 {
+					fmt.Print("\a")
+					lastWasTab = false
+					continue
+				}
 				suffix := matches[0]
+				fmt.Print(suffix + " ")
 				line = append(line, []rune(suffix)...)
 				line = append(line, ' ')
-				fmt.Print(suffix + " ")
 				lastWasTab = false
-
-			default:
-				if len(longestCommonPrefix) > 0 {
-					// extend to the common prefix, no trailing space (still ambiguous)
-					fmt.Print(string(longestCommonPrefix))
-					line = append(line, longestCommonPrefix...)
-					lastWasTab = false
-				} else if lastWasTab {
-					fmt.Print("\r\n")
-					for _, m := range matches {
-						fmt.Print(string(line) + m + "  ")
-					}
-					fmt.Print("\b\b\r\n")
-					fmt.Print("$ ")
-					fmt.Print(string(line))
-					lastWasTab = false
-				} else {
-					fmt.Print("\a")
-					lastWasTab = true
-				}
 			}
 		case 127, 8:
 			if len(line) > 0 {
@@ -183,4 +201,13 @@ func processCommand(input string) bool {
 		stderrFile.Close()
 	}
 	return false
+}
+
+func splitLastWord(line []rune) (prefix string, word string) {
+	s := string(line)
+	idx := strings.LastIndex(s, " ")
+	if idx == -1 {
+		return "", s // no space yet — completing the command itself
+	}
+	return s[:idx+1], s[idx+1:] // prefix includes the trailing space
 }

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 	"slices"
+	"strings"
 
 	"github.com/codecrafters-io/shell-starter-go/builtins"
 )
@@ -81,7 +83,7 @@ func loadExecutables() {
 	}
 }
 
-func autocompleteSuffix(line string) ([]rune, []string) {
+func autoCompleteCommand(line string) ([]rune, []string) {
 	curr := currTrie.root
 
 	for _, r := range line {
@@ -118,5 +120,22 @@ func dfs(node *TrieNode, curr []rune, matches []string) []string {
 		curr = curr[:len(curr)-1]
 	}
 
+	return matches
+}
+
+func autoCompleteArgument(word string) []string {
+	matches := []string{}
+	dirs, err := os.ReadDir(".")
+	if err != nil {
+		fmt.Fprintln(crlfWriter{os.Stderr}, err)
+		return matches
+	}
+	for _, d := range dirs {
+		if !d.IsDir() {
+			if strings.HasPrefix(d.Name(), word) {
+				matches = append(matches, d.Name()[len(word):])
+			}
+		}
+	}
 	return matches
 }
