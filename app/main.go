@@ -278,6 +278,8 @@ func processCommand(input string) bool {
 		builtins.Cd(cmd.Args, stderrWriter)
 	case "complete":
 		builtins.Complete(cmd.Args, stdoutWriter, stderrWriter)
+	case "jobs":
+		builtins.Jobs()
 	case "exit":
 		return true
 	default:
