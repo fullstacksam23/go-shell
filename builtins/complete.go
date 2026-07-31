@@ -1,7 +1,9 @@
 package builtins
 
 import (
+	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -46,8 +48,13 @@ func Complete(args []string, stdout, stderr io.Writer) {
 	}
 }
 
-func RunCompleter(script, cmd, current, previous string) ([]string, error) {
-	out, err := exec.Command(script, cmd, current, previous).Output()
+func RunCompleter(script, cmd, current, previous, line string) ([]string, error) {
+	cmdExec := exec.Command(script, cmd, current, previous)
+	cmdExec.Env = append(os.Environ(),
+		"COMP_LINE="+line,
+		fmt.Sprintf("COMP_POINT=%d", len([]byte(line))),
+	)
+	out, err := cmdExec.Output()
 	if err != nil {
 		return nil, err
 	}

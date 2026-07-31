@@ -96,7 +96,7 @@ func main() {
 
 				if spec, ok := builtins.GetCompletionSpec(cmd); ok {
 
-					matches, err := builtins.RunCompleter(spec.Script, cmd, current, previous)
+					matches, err := builtins.RunCompleter(spec.Script, cmd, current, previous, string(line))
 					if err == nil {
 
 						if len(matches) == 0 {
@@ -118,8 +118,6 @@ func main() {
 							lastWasTab = false
 							continue
 						}
-
-						// Multiple matches (same behavior as your existing code)
 					}
 				}
 				//get the path
