@@ -86,17 +86,20 @@ func CompletionContext(line []rune) (cmd, current, previous string) {
 
 	// Cursor is after a space: "git remote "
 	if len(line) > 0 && line[len(line)-1] == ' ' {
-		if len(fields) >= 2 {
+		current = ""
+
+		if len(fields) >= 1 {
 			previous = fields[len(fields)-1]
 		}
-		current = ""
+
 		return
 	}
 
 	// Cursor is inside a word: "git remote set"
+	// Cursor is inside a word
 	current = fields[len(fields)-1]
 
-	if len(fields) >= 3 {
+	if len(fields) >= 2 {
 		previous = fields[len(fields)-2]
 	}
 
