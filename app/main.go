@@ -130,9 +130,12 @@ func main() {
 								lastWasTab = false
 							} else {
 								lcp := longestCommonPrefixOf(matches)
-								if len(lcp) > 0 {
-									fmt.Print(lcp)
-									line = append(line, []rune(lcp)...)
+
+								if len(lcp) > len(current) {
+									suffix := lcp[len(current):]
+
+									fmt.Print(suffix)
+									line = append(line, []rune(suffix)...)
 									lastWasTab = false
 								} else {
 									fmt.Print("\a")
