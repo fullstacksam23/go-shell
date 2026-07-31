@@ -46,6 +46,9 @@ func Complete(args []string, stdout, stderr io.Writer) {
 			Command: cmd,
 		}
 		completionStore[cmd] = spec
+	case "-r":
+		cmd := args[1]
+		delete(completionStore, cmd)
 	}
 }
 
