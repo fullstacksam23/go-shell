@@ -1,6 +1,10 @@
 package builtins
 
-import "io"
+import (
+	"io"
+	"os/exec"
+	"strings"
+)
 
 type CompletionSpec struct {
 	Script  string
@@ -40,4 +44,23 @@ func Complete(args []string, stdout, stderr io.Writer) {
 		}
 		completionStore[cmd] = spec
 	}
+}
+
+func CompletionAvailable(cmd string) bool {
+	_, e := completionStore[cmd]
+	return e
+}
+func GetCompletion(cmd string) string {
+	spec, e := completionStore[cmd]
+	if !e {
+		return ""
+	}
+
+	command := exec.Command(spec.Script)
+	out, err := command.Output()
+	if err != nil {
+		return ""
+	}
+
+	return strings.TrimSpace(string(out))
 }

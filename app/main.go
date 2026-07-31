@@ -91,7 +91,13 @@ func main() {
 					}
 				}
 			} else {
-
+				if word == "" && builtins.CompletionAvailable(prefix[:len(prefix)-1]) {
+					candidate := builtins.GetCompletion(prefix[:len(prefix)-1])
+					fmt.Print(candidate + " ")
+					line = append(line, []rune(candidate)...)
+					line = append(line, ' ')
+					continue
+				}
 				//get the path
 				path_items := strings.Split(word, "/")
 				matches := []string{}
@@ -139,6 +145,7 @@ func main() {
 					}
 
 				}
+
 			}
 		case 127, 8:
 			if len(line) > 0 {
