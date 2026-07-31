@@ -52,7 +52,7 @@ func main() {
 
 		case '\t':
 			prefix, word := splitLastWord(line)
-
+			//there are no spaces so far
 			if prefix == "" {
 
 				longestCommonPrefix, matches := autoCompleteCommand(string(word))
@@ -90,13 +90,37 @@ func main() {
 						lastWasTab = true
 					}
 				}
+				// there are spaces in here
 			} else {
-				if word == "" && builtins.CompletionAvailable(prefix[:len(prefix)-1]) {
-					candidate := builtins.GetCompletion(prefix[:len(prefix)-1])
-					fmt.Print(candidate + " ")
-					line = append(line, []rune(candidate)...)
-					line = append(line, ' ')
-					continue
+				cmd, current, previous := builtins.CompletionContext(line)
+
+				if spec, ok := builtins.GetCompletionSpec(cmd); ok {
+
+					matches, err := builtins.RunCompleter(spec.Script, cmd, current, previous)
+					if err == nil {
+
+						if len(matches) == 0 {
+							fmt.Print("\a")
+							lastWasTab = false
+							continue
+						}
+
+						if len(matches) == 1 {
+							completion := matches[0]
+
+							suffix := completion[len(current):]
+
+							fmt.Print(suffix + " ")
+
+							line = append(line, []rune(suffix)...)
+							line = append(line, ' ')
+
+							lastWasTab = false
+							continue
+						}
+
+						// Multiple matches (same behavior as your existing code)
+					}
 				}
 				//get the path
 				path_items := strings.Split(word, "/")

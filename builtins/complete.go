@@ -46,21 +46,51 @@ func Complete(args []string, stdout, stderr io.Writer) {
 	}
 }
 
-func CompletionAvailable(cmd string) bool {
-	_, e := completionStore[cmd]
-	return e
-}
-func GetCompletion(cmd string) string {
-	spec, e := completionStore[cmd]
-	if !e {
-		return ""
-	}
-
-	command := exec.Command(spec.Script)
-	out, err := command.Output()
+func RunCompleter(script, cmd, current, previous string) ([]string, error) {
+	out, err := exec.Command(script, cmd, current, previous).Output()
 	if err != nil {
-		return ""
+		return nil, err
 	}
 
-	return strings.TrimSpace(string(out))
+	var matches []string
+	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+		line = strings.TrimSpace(line)
+		if line != "" {
+			matches = append(matches, line)
+		}
+	}
+
+	return matches, nil
+}
+func GetCompletionSpec(cmd string) (CompletionSpec, bool) {
+	spec, ok := completionStore[cmd]
+	return spec, ok
+}
+
+func CompletionContext(line []rune) (cmd, current, previous string) {
+	fields := strings.Fields(string(line))
+
+	if len(fields) == 0 {
+		return "", "", ""
+	}
+
+	cmd = fields[0]
+
+	// Cursor is after a space: "git remote "
+	if len(line) > 0 && line[len(line)-1] == ' ' {
+		if len(fields) >= 2 {
+			previous = fields[len(fields)-1]
+		}
+		current = ""
+		return
+	}
+
+	// Cursor is inside a word: "git remote set"
+	current = fields[len(fields)-1]
+
+	if len(fields) >= 3 {
+		previous = fields[len(fields)-2]
+	}
+
+	return
 }
