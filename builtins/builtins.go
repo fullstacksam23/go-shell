@@ -7,4 +7,5 @@ var BuiltIn = map[string]struct{}{
 	"pwd":      {},
 	"cd":       {},
 	"complete": {},
+	"jobs":     {},
 }
