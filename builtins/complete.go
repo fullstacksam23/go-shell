@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 )
 
@@ -66,7 +67,7 @@ func RunCompleter(script, cmd, current, previous, line string) ([]string, error)
 			matches = append(matches, line)
 		}
 	}
-
+	slices.Sort(matches)
 	return matches, nil
 }
 func GetCompletionSpec(cmd string) (CompletionSpec, bool) {

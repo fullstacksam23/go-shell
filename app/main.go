@@ -118,6 +118,22 @@ func main() {
 							lastWasTab = false
 							continue
 						}
+						if len(matches) > 1 {
+							if lastWasTab {
+								fmt.Print("\r\n")
+								for _, m := range matches {
+									fmt.Print(m + "  ")
+								}
+								fmt.Print("\r\n")
+								fmt.Print("$ ")
+								fmt.Print(string(line))
+								lastWasTab = false
+							} else {
+								fmt.Print("\a")
+								lastWasTab = true
+							}
+							continue
+						}
 					}
 				}
 				//get the path
