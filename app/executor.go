@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -9,7 +10,7 @@ import (
 	"github.com/codecrafters-io/shell-starter-go/pathutil"
 )
 
-func executor(command string, args []string, stdoutWriter, stderrWriter io.Writer) error {
+func executor(command string, args []string, background bool, stdoutWriter, stderrWriter io.Writer) error {
 
 	isExecutable, _ := pathutil.FindExecutable(command)
 	if !isExecutable {
@@ -21,13 +22,22 @@ func executor(command string, args []string, stdoutWriter, stderrWriter io.Write
 	cmd.Stderr = stderrWriter
 	cmd.Stdout = stdoutWriter
 
-	err := cmd.Run()
-	if err != nil {
-		var exitErr *exec.ExitError
-		if errors.As(err, &exitErr) {
-			return nil // suppress exit status
+	if background {
+		err := cmd.Start()
+		if err != nil {
+			return err
 		}
-		return err
+		fmt.Fprintf(stdoutWriter, "[1] %d\n", cmd.Process.Pid)
+		go cmd.Wait()
+	} else {
+		err := cmd.Run()
+		if err != nil {
+			var exitErr *exec.ExitError
+			if errors.As(err, &exitErr) {
+				return nil // suppress exit status
+			}
+			return err
+		}
 	}
 	return nil
 }
