@@ -20,6 +20,8 @@ func HandleJobs(stdout io.Writer) {
 		marker := " "
 		if i == len(JobList)-1 {
 			marker = "+"
+		} else if i == len(JobList)-2 {
+			marker = "-"
 		}
 
 		fmt.Fprintf(stdout,
