@@ -16,7 +16,8 @@ var JobList []*BackgroundJob
 var nextJobId = 1
 
 func HandleJobs(stdout io.Writer) {
-	for i, job := range JobList {
+	for i := len(JobList) - 1; i >= 0; i-- {
+		job := JobList[i]
 		marker := " "
 		if i == len(JobList)-1 {
 			marker = "+"
@@ -31,6 +32,9 @@ func HandleJobs(stdout io.Writer) {
 			job.Status,
 			job.Command,
 		)
+		if job.Status == "Done" {
+			JobList = append(JobList[:i], JobList[i+1:]...)
+		}
 	}
 }
 

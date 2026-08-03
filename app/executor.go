@@ -34,7 +34,14 @@ func executor(command string, args []string, background bool, stdoutWriter, stde
 
 		job := builtins.AddJob(pid, full_command)
 		fmt.Fprintf(stdoutWriter, "[%d] %d\n", job.JobID, pid)
-		go cmd.Wait()
+		go func() {
+			err := cmd.Wait()
+			if err != nil {
+				job.Status = "Failed"
+				return
+			}
+			job.Status = "Done"
+		}()
 	} else {
 		err := cmd.Run()
 		if err != nil {
