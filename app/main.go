@@ -46,7 +46,7 @@ func main() {
 			if processCommand(input) {
 				return
 			}
-
+			builtins.ReapBeforePrompt(stdout)
 			fmt.Print("$ ")
 
 		case '\t':

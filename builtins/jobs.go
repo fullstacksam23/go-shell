@@ -24,20 +24,25 @@ func HandleJobs(stdout io.Writer) {
 			marker = "-"
 		}
 
-		fmt.Fprintf(stdout,
-			"[%d]%s  %-24s%s\n",
-			job.JobID,
-			marker,
-			job.Status,
-			job.Command,
-		)
+		printJob(job, marker, stdout)
 	}
 	//remove "Done" jobs
-	for i := len(JobList) - 1; i >= 0; i-- {
-		if JobList[i].Status == "Done" {
-			JobList = append(JobList[:i], JobList[i+1:]...)
+	reapJobs()
+}
+
+func ReapBeforePrompt(stdout io.Writer) {
+	for i, job := range JobList {
+		if job.Status == "Done" {
+			marker := " "
+			if i == len(JobList)-1 {
+				marker = "+"
+			} else if i == len(JobList)-2 {
+				marker = "-"
+			}
+			printJob(job, marker, stdout)
 		}
 	}
+	reapJobs()
 }
 
 func AddJob(pid int, command string) *BackgroundJob {
@@ -50,4 +55,22 @@ func AddJob(pid int, command string) *BackgroundJob {
 	JobList = append(JobList, job)
 	nextJobId++
 	return job
+}
+
+func reapJobs() {
+	for i := len(JobList) - 1; i >= 0; i-- {
+		if JobList[i].Status == "Done" {
+			JobList = append(JobList[:i], JobList[i+1:]...)
+		}
+	}
+}
+
+func printJob(job *BackgroundJob, marker string, stdout io.Writer) {
+	fmt.Fprintf(stdout,
+		"[%d]%s  %-24s%s\n",
+		job.JobID,
+		marker,
+		job.Status,
+		job.Command,
+	)
 }
