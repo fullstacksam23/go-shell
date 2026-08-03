@@ -6,7 +6,9 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 
+	"github.com/codecrafters-io/shell-starter-go/builtins"
 	"github.com/codecrafters-io/shell-starter-go/pathutil"
 )
 
@@ -27,7 +29,11 @@ func executor(command string, args []string, background bool, stdoutWriter, stde
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(stdoutWriter, "[1] %d\n", cmd.Process.Pid)
+		pid := cmd.Process.Pid
+		full_command := command + " " + strings.Join(args, " ") + " &"
+
+		job := builtins.AddJob(pid, full_command)
+		fmt.Fprintf(stdoutWriter, "[%d] %d\n", job.JobID, pid)
 		go cmd.Wait()
 	} else {
 		err := cmd.Run()

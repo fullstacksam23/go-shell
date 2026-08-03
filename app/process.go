@@ -83,7 +83,7 @@ func processCommand(input string) bool {
 	case "complete":
 		builtins.Complete(cmd.Args, stdoutWriter, stderrWriter)
 	case "jobs":
-		builtins.Jobs()
+		builtins.HandleJobs(stdoutWriter)
 	case "exit":
 		return true //return true only when we want to exit shell
 	default:
