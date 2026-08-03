@@ -46,6 +46,9 @@ func ReapBeforePrompt(stdout io.Writer) {
 }
 
 func AddJob(pid int, command string) *BackgroundJob {
+	if len(JobList) == 0 {
+		nextJobId = 1
+	}
 	job := &BackgroundJob{
 		JobID:   nextJobId,
 		Pid:     pid,
