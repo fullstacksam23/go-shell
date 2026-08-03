@@ -70,6 +70,20 @@ func parse(tokens []string) (*ParsedCommand, error) {
 
 }
 
+func parsePipeline(input string) ([]*ParsedCommand, error) {
+	parts := strings.Split(input, "|")
+	commands := make([]*ParsedCommand, 0, len(parts))
+
+	for _, part := range parts {
+		p, err := parse(tokenize(strings.TrimSpace(part)))
+		if err != nil {
+			return nil, err
+		}
+		commands = append(commands, p)
+	}
+	return commands, nil
+}
+
 func tokenize(input string) []string {
 	var tokens []string
 	var current strings.Builder

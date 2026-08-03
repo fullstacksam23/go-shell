@@ -54,3 +54,45 @@ func executor(command string, args []string, background bool, stdoutWriter, stde
 	}
 	return nil
 }
+
+func executePipeline(commands []*ParsedCommand, stdoutWriter, stderrWriter io.Writer) error {
+	cmds := make([]*exec.Cmd, len(commands))
+
+	for i, p := range commands {
+		cmds[i] = exec.Command(p.Command, p.Args...)
+	}
+
+	var prev io.ReadCloser
+
+	for i, cmd := range cmds {
+
+		// stdin
+		if prev != nil {
+			cmd.Stdin = prev
+		}
+
+		// stdout
+		if i != len(cmds)-1 {
+			next, err := cmd.StdoutPipe()
+			if err != nil {
+				return err
+			}
+			prev = next
+		} else {
+			cmd.Stdout = stdoutWriter
+		}
+
+		cmd.Stderr = stderrWriter
+	}
+
+	for _, cmd := range cmds {
+		if err := cmd.Start(); err != nil {
+			return err
+		}
+	}
+
+	for _, cmd := range cmds {
+		cmd.Wait()
+	}
+	return nil
+}

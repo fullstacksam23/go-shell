@@ -10,6 +10,17 @@ import (
 )
 
 func processCommand(input string) bool {
+
+	stdoutWriter := io.Writer(crlfWriter{os.Stdout})
+	stderrWriter := io.Writer(crlfWriter{os.Stderr})
+
+	if strings.Contains(input, "|") {
+		err := processPipeline(input, stdoutWriter, stderrWriter)
+		if err != nil {
+			fmt.Fprintln(crlfWriter{os.Stderr}, err)
+		}
+		return false
+	}
 	items := tokenize(strings.TrimSpace(input))
 
 	cmd, err := parse(items)
@@ -23,9 +34,6 @@ func processCommand(input string) bool {
 		cmd.Args = cmd.Args[:len(cmd.Args)-1]
 		background = true
 	}
-
-	stdoutWriter := io.Writer(crlfWriter{os.Stdout})
-	stderrWriter := io.Writer(crlfWriter{os.Stderr})
 
 	var stdoutFile *os.File
 	var stderrFile *os.File
@@ -101,6 +109,19 @@ func processCommand(input string) bool {
 		stderrFile.Close()
 	}
 	return false
+}
+
+func processPipeline(input string, stdoutWriter, stderrWriter io.Writer) error {
+	commands, err := parsePipeline(input)
+	if err != nil {
+		return err
+	}
+
+	err = executePipeline(commands, stdoutWriter, stderrWriter)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func splitLastWord(line []rune) (prefix string, word string) {
