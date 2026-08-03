@@ -30,7 +30,7 @@ func executor(command string, args []string, background bool, stdoutWriter, stde
 			return err
 		}
 		pid := cmd.Process.Pid
-		full_command := command + " " + strings.Join(args, " ") + " &"
+		full_command := command + " " + strings.Join(args, " ")
 
 		job := builtins.AddJob(pid, full_command)
 		fmt.Fprintf(stdoutWriter, "[%d] %d\n", job.JobID, pid)
